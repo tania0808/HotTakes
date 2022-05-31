@@ -8,7 +8,7 @@ const MIME_TYPES = {
 console.log(MIME_TYPES['image/jpeg']);
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'images');
+        cb(null, 'images/');
     },
     filename: (req, file, cb) => {
         const name = file.originalname.split('.').join('_');

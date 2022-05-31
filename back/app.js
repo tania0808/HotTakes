@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
+const path = require('path');
 // Import routes
 const usersRoutes = require('./routes/users');
 const saucesRoutes = require('./routes/sauces');
@@ -28,10 +29,10 @@ mongoose.connect(process.env.CONNECTION_DB,
 .catch(() => console.log('Connection à MongoDB échouée !'));
 
 
-app.use(express.static('images'));
 
 // Middleware
 app.use(express.json());
+app.use('/images', express.static(path.join(__dirname, 'images')));
 
 // Route Middlewares
 app.use('/api/auth', usersRoutes);
