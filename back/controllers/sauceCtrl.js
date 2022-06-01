@@ -26,26 +26,97 @@ exports.createSauce =  (req, res) => {
     })
 };
 
-exports.updateSauce =  (req, res, next) => {
-    if(!req.file) {
-        Sauce.updateOne({ _id: req.params.id }, { ...req.body, _id: req.params.id})
-    .then(() => res.status(200).json({ message: 'Sauce modifiée !' }))
-    .catch(err => res.status(400).json({ error }));
-    } else {
-        Sauce.updateOne({ _id: req.params.id }, { ...req.body, _id: req.params.id, imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`})
-        .then(() => res.status(200).json({ message: 'Sauce modifiée !' }))
-        .catch(err => res.status(400).json({ error }));
+exports.updateSauce = (req, res, next) => {
+    Sauce.findOne({ _id: req.params.id}).then (
+        (sauce) => {
+            if(!sauce) {
+                res.status(404).json({
+                    message: new Error('No such sauce !')
+                });
+            }
 
-    }
+            if(sauce.userId !== req.auth.userId) {
+                res.status(404).json({
+                    message: new Error('Unauthorized request !')
+                });
+            }
+            if(!req.file) {
+                Sauce.updateOne({ _id: req.params.id }, { ...req.body, _id: req.params.id})
+                .then(() => res.status(200).json({ message: 'Sauce modifiée !' }))
+            } else {
+                Sauce.updateOne({ _id: req.params.id }, { ...req.body, _id: req.params.id, imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`})
+                .then(() => res.status(200).json({ message: 'Sauce modifiée !' }))
+            }
+
+        }
+    ).catch((error) => {
+        res.status(400).json({
+            message: error
+        });
+    })
 };
 
 exports.deleteSauce =  async (req, res) => {
-    try{
-        const sauceToDelete = await Sauce.findByIdAndDelete(req.params.id);
-        if(!sauceToDelete) return res.status(404).json({ message: "Id is not found !" });
-        res.status(200).json({ message: 'Sauce was deleted !'});
-    }
-    catch(err) {
-        res.status(404).json({ message: err });
-    }
+    Sauce.findOne({ _id: req.params.id}).then(
+        (sauce) => {
+            if(!sauce) {
+                res.status(404).json({ message: "Id is not found !" });
+            }
+
+            if(sauce.userId !== req.auth.userId) {
+                res.status(400).json({
+                    message: 'Unauthorized request !'
+                });
+            } else{
+
+                Sauce.deleteOne({ _id: req.params.id}).then(
+                    () => {
+                        res.status(200).json({ 
+                            message: 'Sauce was deleted !'
+                        });
+                    }
+                )
+            }
+
+        }
+    ).catch(
+        (error) => {
+            res.status(404).json({ 
+               message: error
+            });
+        }
+    );
+    // try{
+    //     const sauceToDelete = await Sauce.findByIdAndDelete(req.params.id);
+    //     if(!sauceToDelete) return res.status(404).json({ message: "Id is not found !" });
+    //     res.status(200).json({ message: 'Sauce was deleted !'});
+    // }
+};
+
+exports.evaluateSauce =  (req, res, next) => {
+    Sauce.findOne({ _id: req.params.id})
+    .then( sauce => {
+        if(!sauce.usersLiked.includes(req.body.userId) && req.body.like === 1)
+        {
+                Sauce.updateOne({ _id: req.params.id}, { $inc : {likes : 1}, $addToSet: { usersLiked: req.body.userId }})
+                .then(res.status(200).json({ message: 'Liked !' }))
+                .catch(err => res.status(400).json({ message: err}))
+        }
+        else if(sauce.usersLiked.includes(req.body.userId) && req.body.like === 0){
+                Sauce.updateOne({ _id: req.params.id}, { $inc : { likes : -1 }, $pull: { usersLiked: req.body.userId  }})
+                .then(res.status(200).json({ message: 'Like is gone !' }))
+                .catch(err => console.log(err))
+        }
+        else if(!sauce.usersDisliked.includes(req.body.userId) && req.body.like === -1){
+                Sauce.updateOne({ _id: req.params.id}, { $inc : { dislikes : 1 }, $addToSet: { usersDisliked: req.body.userId }})
+                .then(res.status(200).json({ message: 'Disliked !' }))
+                .catch(err => console.log(err))
+        }
+        else if(sauce.usersDisliked.includes(req.body.userId) && req.body.like === 0){
+                Sauce.updateOne({ _id: req.params.id}, { $inc : { dislikes : -1 }, $pull: { usersDisliked: req.body.userId }})
+                .then(res.status(200).json({ message: 'Dislike is gone !' }))
+                .catch(err => console.log(err))
+        }
+    })
+    .catch(err => res.status(400).json({ message: err }));
 };

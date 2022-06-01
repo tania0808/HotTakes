@@ -18,5 +18,12 @@ const storage = multer.diskStorage({
     }
 });
 
-
-module.exports = multer({ storage}).single('image');
+const maxSize = 1024 ** 2;
+module.exports = multer({ 
+    storage: storage,
+    limits: { fileSize: maxSize },
+    onError: function(err, next) {
+        console.log('Choose an image under 2Mb !', err);
+        next(err);
+    }
+}).single('image');
