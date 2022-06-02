@@ -1,11 +1,20 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { loginValidation } = require('../middleware/validation');
+const { loginValidation, passwordValidation } = require('../middleware/validation');
 
 exports.userSignUp = async (req, res, next) => {
     // VALIDATE DATA BEFORE CREATING A USER
     const { error }  = loginValidation(req.body);
+    const details = passwordValidation(req.body.password);
+    
+    if(!details) {
+        return res.status(400).send({ message: "The string should have a minimum length of 6 characters, a minimum of 1 uppercase letter, a minimum of 2 digits, should not have spaces"});
+    }
+    // if(details.length > 0 && passwordValidation(req.body.password)) {
+    //     return res.status(400).send({ message: details[0].message});
+    // }
+
     if(error) return res.status(400).send({ message: error.details[0].message});
 
     //CHECKING IF USER IS ALREADY IN THE DATABASE
