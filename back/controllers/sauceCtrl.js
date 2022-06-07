@@ -25,7 +25,7 @@ exports.createSauce =  (req, res) => {
 
     sauce.save(function(err) {
         if(err) res.status(400).json({ message: err });
-        res.status(200).json({ message: 'La sauce a bien été ajoutée !' });
+        res.status(200).json({ message: 'The sauce was added !' });
     })
 };
 
@@ -34,7 +34,7 @@ exports.updateSauce = (req, res) => {
     .then(sauce => {
         if(!sauce) {
             res.status(404).json({
-                message: new Error('No such sauce !')
+                message: new Error('No such a sauce !')
             });
         }
 
@@ -46,7 +46,7 @@ exports.updateSauce = (req, res) => {
 
         if(!req.file) {
             Sauce.updateOne({ _id: req.params.id }, { ...req.body, _id: req.params.id})
-            .then(() => res.status(200).json({ message: 'Sauce modifiée !' }))
+            .then(() => res.status(200).json({ message: 'Sauce was modified !' }))
         } 
         else {
             Sauce.findOne({ _id: req.params.id})
@@ -54,7 +54,7 @@ exports.updateSauce = (req, res) => {
                 const filename = sauce.imageUrl.split('/images/')[1];
                 fs.unlink(`images/${filename}`, () => {
                     Sauce.updateOne({ _id: req.params.id }, { ...req.body, _id: req.params.id, imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`})
-                    .then(() => res.status(200).json({ message: 'Sauce modifiée !' }));
+                    .then(() => res.status(200).json({ message: 'Sauce was modified !' }));
                 })
             })
         }

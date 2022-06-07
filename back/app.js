@@ -24,8 +24,8 @@ app.all('*', (req, res, next) => {
 mongoose.connect(process.env.CONNECTION_DB, 
 { useNewUrlParser: true,
   useUnifiedTopology: true })
-.then(() => console.log('Connection à MongoDB réussie !'))
-.catch(() => console.log('Connection à MongoDB échouée !'));
+.then(() => console.log('Connection to MongoDB is successful !'))
+.catch(() => console.log('Connection to MongoDB is failed !'));
 
 // Middleware
 app.use(express.json());

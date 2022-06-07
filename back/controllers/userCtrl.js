@@ -29,7 +29,7 @@ exports.userSignUp = async (req, res, next) => {
     // SAVE USER
     try {
         await user.save();
-        res.send({ message: "L'utilisateur a bien été crée !"});
+        res.send({ message: "User was created !!! "});
     }
 
     // SEND AN ERROR
