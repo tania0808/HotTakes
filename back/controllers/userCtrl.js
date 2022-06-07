@@ -1,19 +1,14 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { loginValidation, passwordValidation } = require('../middleware/validation');
+const { userValidation, passwordValidation } = require('../middleware/validation');
 
 exports.userSignUp = async (req, res, next) => {
     // VALIDATE DATA BEFORE CREATING A USER
-    const { error }  = loginValidation(req.body);
-    const details = passwordValidation(req.body.password);
+    const { error }  = userValidation(req.body);
+    const isValidPassword = passwordValidation(req.body.password);
     
-    if(!details) {
-        return res.status(400).send({ message: "The string should have a minimum length of 6 characters, a minimum of 1 uppercase letter, a minimum of 2 digits, should not have spaces"});
-    }
-    // if(details.length > 0 && passwordValidation(req.body.password)) {
-    //     return res.status(400).send({ message: details[0].message});
-    // }
+    if(!isValidPassword) return res.status(400).send({ message: "The string should have a minimum length of 6 characters, a minimum of 1 uppercase letter, a minimum of 2 digits, should not have spaces"});
 
     if(error) return res.status(400).send({ message: error.details[0].message});
 
@@ -30,21 +25,21 @@ exports.userSignUp = async (req, res, next) => {
         email: req.body.email,
         password: hashedPassword
     });
+
     // SAVE USER
     try {
-        const registeredUser = await user.save();
-        //res.send({user: user_id})
+        await user.save();
         res.send({ message: "L'utilisateur a bien été crée !"});
     }
+
     // SEND AN ERROR
-    catch(err) {
-        res.status(400).send(err)
-    }
+    catch(err){ res.status(400).send(err) }
 };
 
 exports.userLogIn =  async (req, res, next) => {
-    // VALIDATE DATA BEFORE CREATING A USER
-    const { error }  = loginValidation(req.body);
+
+    // VALIDATE DATA BEFORE LOGGING IN
+    const { error }  = userValidation(req.body);
     if(error) return res.status(400).send({ message: error.details[0].message});
 
     //CHECKING IF USER EMAIL EXISTS

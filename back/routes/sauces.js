@@ -1,14 +1,16 @@
 const router = require('express').Router();
 const sauceCtrl = require('../controllers/sauceCtrl');
 
-
-const Sauce = require('../models/Sauce');
+// Token verification
 const auth = require('../middleware/verifyToken');
+
+// Multer for images
 const multer = require('../middleware/multer');
 
-router.get('/', sauceCtrl.getAllSauces);
+// Sauce routes
+router.get('/', auth, sauceCtrl.getAllSauces);
 
-router.get('/:id', sauceCtrl.getOneSauce);
+router.get('/:id', auth, sauceCtrl.getOneSauce);
 
 router.post('/', auth, multer, sauceCtrl.createSauce);
 
@@ -17,8 +19,5 @@ router.put('/:id', auth, multer, sauceCtrl.updateSauce);
 router.delete('/:id', auth, sauceCtrl.deleteSauce);
 
 router.post('/:id/like', sauceCtrl.evaluateSauce );
-
-
-
 
 module.exports = router;

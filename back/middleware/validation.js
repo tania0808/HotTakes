@@ -2,10 +2,8 @@
 const Joi = require('@hapi/joi');
 const passwordValidator = require('password-validator');
 
-// Create a schema
-
+// Create a schema for detailed password validation
 const passwordValidation = data => {
-
     const schema = new passwordValidator();
     
     // Add properties to it
@@ -22,7 +20,7 @@ const passwordValidation = data => {
 
 
 // REGISTER VALIDATION
-const loginValidation = data => {
+const userValidation = data => {
     const schema = Joi.object ({
         email: Joi.string().min(6).required().email(),
         password: Joi.string().min(6).required()
@@ -31,5 +29,5 @@ const loginValidation = data => {
     return schema.validate(data);
 };
 
-module.exports.loginValidation = loginValidation;
+module.exports.userValidation = userValidation;
 module.exports.passwordValidation = passwordValidation;
